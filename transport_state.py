@@ -15,6 +15,8 @@ import time
 
 
 REFRESH_TIME = 5 * 60
+ILLUMINATED = 0.04
+UNILLUMINATED = 0.0
 
 
 def typo_correct(input):
@@ -97,17 +99,22 @@ def illuminate():
     status = [all_statuses[el] for el in lines]
     line_colours = [colours.LINE_COLOURS.get(el) for el in lines]
 
-    processes = []
-    for n, (rgb, s) in enumerate(zip(line_colours, status)):
-        print(s)
-        operation = pixel_operation(s)
-        process = multiprocessing.Process(target=operation, args=(n, rgb))
-        process.start()
-        processes.append(process)
+    start = time.time()
+    while time.time < start + REFRESH_TIME:
+        flashing = ILLUMINATED
 
-    for p in processes:
-        p.join()
-    print('All processes joined')
+        for n, (rgb, s) in enumerate(zip(line_colours, status)):
+            if s == 'GOOD':
+                blinkt.set_pixel(n, *rgb, brightness=ILLUMINATED)
+            # elif s == 'BAD':
+            #     blinkt.set_pixel(n, *rgb, brightness=UNILLUMINATED)
+            else:
+                blinkt.set_pixel(n, *rgb, brightness=flashing)
+
+            flashing = UNILLUMINATED
+            blinkt.show()
+            time.sleep(1.5)
+
 
 def main():
     while True:
