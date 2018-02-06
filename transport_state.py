@@ -1,33 +1,22 @@
-"""
-Read in files transport_lines.txt.
-
-Handle these cases carefully:
-
-    More or less than 8 lines
-
-"""
-
 import blinkt
 import colours
-import multiprocessing
 import requests
 import time
 
 
 REFRESH_TIME = 5 * 60
-ILLUMINATED = 0.04
-UNILLUMINATED = 0.0
+ILLUMINATED_INTENSITY = 0.04
 
 
 def typo_correct(input):
     subs = {
         'hamm': 'hammersmith-city',
         'over': 'london-overground',
-        'rail': 'tflrail',
+        'rail': 'tfl-rail',
         'doc':  'dlr',
         'met':  'metropolitan',
         'pic':  'piccadilly',
-        'tfl':  'tflrail',
+        'tfl':  'tfl-rail',
         'wat':  'waterloo-city',
     }
     for k, v in subs.items():
@@ -53,44 +42,11 @@ def transport_status():
     requests.packages.urllib3.disable_warnings()
     url = ('https://api.tfl.gov.uk/Line/Mode/' +
         'tube,dlr,overground,tflrail,tram/Status')
-    resp = requests.get(url).json()
+    resp = requests.get(url, timeout=5).json()
 
     statuses = {el['id']: el['lineStatuses'][0]['statusSeverityDescription']
                 for el in resp}
     return {k: status_aliases.get(statuses[k], 'BAD') for k in statuses.keys()}
-
-
-def pixel_operation(status):
-
-    def good_op(x, rgb):
-        start = time.time()
-        while time.time() < start + REFRESH_TIME:
-            blinkt.set_pixel(x, *rgb, brightness=0.04)
-            blinkt.show()
-            time.sleep(1)
-
-    def flash_op(x, rgb):
-        start = time.time()
-        while time.time() < start + REFRESH_TIME:
-            blinkt.set_pixel(x, *rgb, brightness=0.04)
-            blinkt.show()
-            time.sleep(1.5)
-            blinkt.set_pixel(x, *rgb, brightness=0.0)
-            blinkt.show()
-            time.sleep(1.5)
-
-    def off_op(x, rgb):
-        start = time.time()
-        while time.time() < start + REFRESH_TIME:
-            blinkt.set_pixel(x, *rgb, brightness=0)
-            blinkt.show()
-            time.sleep(1)
-
-    return {
-            'GOOD': good_op,
-            'OK':   flash_op,
-            'BAD':  off_op,
-        }[status]
 
 
 def illuminate():
@@ -100,20 +56,22 @@ def illuminate():
     line_colours = [colours.LINE_COLOURS.get(el) for el in lines]
 
     start = time.time()
-    while time.time < start + REFRESH_TIME:
-        flashing = ILLUMINATED
+    count = 0
 
-        for n, (rgb, s) in enumerate(zip(line_colours, status)):
-            if s == 'GOOD':
-                blinkt.set_pixel(n, *rgb, brightness=ILLUMINATED)
-            # elif s == 'BAD':
-            #     blinkt.set_pixel(n, *rgb, brightness=UNILLUMINATED)
-            else:
-                blinkt.set_pixel(n, *rgb, brightness=flashing)
+    while time.time() < start + REFRESH_TIME:
+        for n, (rgb, state) in enumerate(zip(line_colours, status)):
+            active = {
+                'GOOD': 1,
+                'OK':   count % 2 == 0,
+                'BAD':  count % 6 == 0,
+            }[state]
+            brightness = active * ILLUMINATED_INTENSITY
 
-            flashing = UNILLUMINATED
-            blinkt.show()
-            time.sleep(1.5)
+            blinkt.set_pixel(n, *rgb, brightness=brightness)
+
+        blinkt.show()
+        count = count + 1
+        time.sleep(1.0)
 
 
 def main():
