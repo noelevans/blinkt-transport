@@ -1,10 +1,11 @@
+import argparse
 import blinkt
 import colours
 import requests
 import time
 
 
-REFRESH_TIME = 5 * 60
+REFRESH_TIME = 10 * 60
 ILLUMINATED_INTENSITY = 0.04
 
 
@@ -52,8 +53,8 @@ def transport_status():
 def illuminate():
     lines = line_choices()
     all_statuses = transport_status()
-    status = [all_statuses[el] for el in lines]
-    line_colours = [colours.LINE_COLOURS.get(el) for el in lines]
+    status = [all_statuses.get(el) for el in lines]
+    line_colours = [colours.LINE_COLOURS.get(el, (0, 0, 0)) for el in lines]
 
     start = time.time()
     count = 0
@@ -64,7 +65,7 @@ def illuminate():
                 'GOOD': 1,
                 'OK':   count % 2 == 0,
                 'BAD':  count % 6 == 0,
-            }[state]
+            }.get(state, 0)
             brightness = active * ILLUMINATED_INTENSITY
 
             blinkt.set_pixel(n, *rgb, brightness=brightness)
@@ -75,6 +76,13 @@ def illuminate():
 
 
 def main():
+    # Adding an option to pause running if started from cron on power-up when
+    # wifi adapter may not be ready causing a reboot and then indefinite loop
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--init_wait', type=int, default=0)
+    args = parser.parse_args()
+    time.sleep(args.init_wait)
+
     while True:
         illuminate()
 
