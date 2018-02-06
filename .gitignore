@@ -1,0 +1,6 @@
+*.log
+*.pyc
+*.Rhistory
+*.RData
+.ipynb_checkpoints/
+
