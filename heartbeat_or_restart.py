@@ -12,11 +12,11 @@ def available_wifi_names():
     for line in response.split('\n'):
         match = re.match('.*ESSID:"(.*)"', line)
         if match and match.groups()[0]:
-            ssids.append(match.groups()[0])
+            ssids.extend(match.groups())
     return ssids
 
 
-def connected_wifi_name():
+def desired_wifi():
     response = subprocess.check_output('iwconfig', shell=True)
     if response:
         first_line = response.split('\n')[0]
@@ -26,7 +26,6 @@ def connected_wifi_name():
 
 
 def can_ping_website():
-    # Unknown error raised when the wifi adapter dies - restart RPi to "fix"
     urls = ['http://www.google.com', 'http://www.bbc.co.uk']
     for u in urls:
         try:
@@ -40,17 +39,31 @@ def can_ping_website():
     return False
 
 
-def main():
-    # Unknown error raised when the wifi adapter dies - restart RPi to "fix"
-    url = 'http://www.google.com'
-    try:
-        requests.packages.urllib3.disable_warnings()
-        _ = requests.get(url)
-        print('Successful ping')
-    except:
-        sys.stderr.write('Failure to connect to Google. Restarting.\n')
-        os.system('sudo shutdown -r now')
+def supplicant_wifi_name():
+    ssids = []
+    with open('/etc/wpa_supplicant/wpa_supplicant.conf') as conf:
+        for line in conf:
+            match = re.match('.*ssid=\"(.*)\"', line)
+            if match:
+                ssids.extend(match.groups())
+    return ssids
 
+
+def main():
+    # Flash all LEDs
+
+    choices = available_wifi_names()
+
+    connection = desired_wifi()
+
+    connection in choices
+
+    can_ping_website()
+
+    """
+    sys.stderr.write('Failure to connect to Google. Restarting.\n')
+    os.system('sudo shutdown -r now')
+    """
 
 if __name__ == '__main__':
     main()
