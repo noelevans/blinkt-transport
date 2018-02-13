@@ -10,7 +10,7 @@ LINE_COLOURS = {
     'metropolitan':         (155,   0,  88),
     'northern':             (255, 255, 255),
     'piccadilly':           (  0,  25, 168),
-    'tflrail':              (  0,  25, 168),
+    'tfl-rail':             (  0,  25, 168),
     'tram':                 (  0, 189,  25),
     'victoria':             (  0, 152, 212),
     'waterloo-city':        (147, 206, 186),
