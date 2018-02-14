@@ -1,3 +1,4 @@
+import blinkt
 import os
 import requests
 import sys
@@ -11,6 +12,8 @@ def main():
         _ = requests.get(url)
         print('Successful ping')
     except:
+        blinkt.set_all(220, 36, 31, brightness=0.04)
+        blinkt.show()
         sys.stderr.write('Failure to connect to Google. Restarting.\n')
         os.system('sudo shutdown -r now')
 
