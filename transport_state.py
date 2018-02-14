@@ -28,7 +28,8 @@ def typo_correct(input):
 
 def line_choices():
     lines = []
-    with open('transport_lines.txt') as ol:
+    path = '/home/pi/repo/blinkt-transport/transport_lines.txt'
+    with open(path) as ol:
         for el in ol.readlines():
             text = el.strip().replace('\n', '').replace('\r', '').lower()
             line = typo_correct(text)
