@@ -1,0 +1,16 @@
+---
+lines:
+- bakerloo
+- dlr
+- circle
+- central
+- jubilee
+- metropolitan
+- piccadilly
+- overground
+
+# How often the LEDs when Good service, Minor delays, Worse respectively
+flash:
+  good: 1
+  ok: 2
+  bad: 6
