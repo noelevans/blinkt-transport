@@ -19,7 +19,7 @@ def available_wifi_names():
 
 
 def desired_wifi():
-    response = subprocess.check_output('iwconfig', shell=True)
+    response = subprocess.check_output('sudo iwconfig', shell=True)
     if response:
         first_line = response.split('\n')[0]
         match = re.match('.*ESSID:"(.*)"', first_line)
@@ -51,7 +51,7 @@ def supplicant_wifi_name():
     return ssids
 
 
-def main():
+def can_ping():
     blinkt.set_brightness(0.04)
     orange = (239, 123, 16)
 
@@ -91,12 +91,15 @@ def main():
 
     set_pixels([6, 7])
 
+    blinkt.set_all(0, 0, 0)
+    blinkt.show()
+
     return True
 
-    """
-    sys.stderr.write('Failure to connect to Google. Restarting.\n')
-    os.system('sudo shutdown -r now')
-    """
+
+def main():
+    return can_ping()
+
 
 if __name__ == '__main__':
     main()
