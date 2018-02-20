@@ -1,4 +1,12 @@
 ---
+# Note this file has 3 dashes on the first line. These must be kept 
+# for the file to work
+
+# List the lines you want to display - no more than 8 with a dash at 
+# the start of each line so the config is understood by the programme. 
+# You can also double up - entering a value twice - to make a line's 
+# state more obvious if desired.
+
 lines:
 - bakerloo
 - dlr
@@ -10,6 +18,8 @@ lines:
 - overground
 
 # How often the LEDs when Good service, Minor delays, Worse respectively
+# Set the value to a number over 250 and there will be no flash.
+
 flash:
   good: 1
   ok: 2
